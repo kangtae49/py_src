@@ -15,15 +15,20 @@ class Server(TCPServer):
 class StreamHandler(object):
     def __init__(self, stream, address):
         self.stream = stream
+
+
+        stream.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+		stream.socket.setsockopt(socket.IPPROTO_TCP, socket.SO_KEEPALIVE, 1)
+
         self.address = address
         self.stream.read_until_close(self.read_done, self.read_chunk)
         #self.stream.read_until_close(self.on_close)
 
     def read_done(self, data):
-        print('close[%s]%s' % (self.address, data))
+        print('[%s]close[%s]%s' % (self, self.address, data))
 
     def read_chunk(self, data):
-        print('chunk[%s]%s' % (self.address, data))
+        print('[%s]chunk[%s]%s' % (self, self.address, data))
         #pass
 
 is_closing = False
@@ -38,7 +43,7 @@ def sig_handler(signum, frame):
 
 def try_exit():
     global is_closing
-    print ('is_closing: %s' % is_closing)
+    #print ('is_closing: %s' % is_closing)
     if is_closing:
         IOLoop.instance().stop()
 
